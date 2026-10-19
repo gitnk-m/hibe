@@ -1,15 +1,16 @@
 import requests
 import pandas as pd
 
-payload = {
+params = {
     "symbol":"BTCUSDT",
     "interval":"4h",
     "limit":5
 }
-res_data = requests.get("https://data-api.binance.vision/api/v3/klines", params=payload)
+res_data = requests.get("https://data-api.binance.vision/api/v3/klines", params=params)
 df = pd.DataFrame([row[:6] for row in res_data.json()])
+price_cols = ["open", "high", "low", "close", "volume"]
 df.columns = ["open_time", "open", "high", "low", "close", "volume"]
-print(df["open"].dtype)
-df[["open", "high", "low", "close", "volume"]] = df[["open", "high", "low", "close", "volume"]].astype("float64")
-df["open_time"] = pd.to_datetime(df["open_time"], unit="ms")
+df[price_cols] = df[price_cols].astype("float64")
+df["open_time"] = pd.to_datetime(df["open_time"], utc=True, unit="ms")
+print(df.dtypes)
 print(df)
