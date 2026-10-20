@@ -1,12 +1,10 @@
 import pandas as pd
-import ta
 
 df = pd.read_csv("data/btc_4h.csv", parse_dates=["open_time"])
 # Return: percentage change of close from the previous candle
 df["return_1"] = df["close"].pct_change()
 
 # Lagged return: return_lag_1, return_lag_2, return_lag_3 = return_1 shifted by 1, 2 and 3 rows.
-# df["return_lag_1"], df["return_lag_2"], df["return_lag_3"] = df["return_1"].shift(1), df["return_1"].shift(2), df["return_1"].shift(3)
 for i in range(1,4):
     df[f'return_lag_{i}'] = df["return_1"].shift(i)
 
@@ -40,24 +38,11 @@ rs = avg_gain/avg_loss
 
 df["rsi_14"] = 100-100/(1+rs)
 
-rsi_test = ta.momentum.RSIIndicator(close = df["close"], window = 14).rsi()
-diff_rsi_test = df.rsi_14 - rsi_test
 
 # checking and droping rows with null values
-print(df.isna().sum())
 df.dropna(inplace=True)
-print(len(df))
-print(df.volume_change.describe())
+df = df.iloc[100:]
+print(len(df))    
 
 # saving the feature in new csv
 df.to_csv("data/btc_4h_features.csv", index=False)
-
-print(df["rsi_14"].describe())
-print(df.tail(5))
-
-
-
-
-
-print("================================================")
-print(diff_rsi_test[diff_rsi_test > 0.01].count())
