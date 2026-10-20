@@ -1,4 +1,5 @@
 import pandas as pd
+import ta
 
 df = pd.read_csv("data/btc_4h.csv", parse_dates=["open_time"])
 # Return: percentage change of close from the previous candle
@@ -37,7 +38,10 @@ avg_loss = loss.ewm(alpha=1/14, min_periods=14, adjust=False).mean()
 
 rs = avg_gain/avg_loss
 
-df["rs_14"] = 100-100/(1+rs)
+df["rsi_14"] = 100-100/(1+rs)
+
+rsi_test = ta.momentum.RSIIndicator(close = df["close"], window = 14).rsi()
+diff_rsi_test = df.rsi_14 - rsi_test
 
 # checking and droping rows with null values
 print(df.isna().sum())
@@ -48,6 +52,12 @@ print(df.volume_change.describe())
 # saving the feature in new csv
 df.to_csv("data/btc_4h_features.csv", index=False)
 
-print("================================================")
-print(df["rs_14"].describe())
+print(df["rsi_14"].describe())
 print(df.tail(5))
+
+
+
+
+
+print("================================================")
+print(diff_rsi_test[diff_rsi_test > 0.01].count())
