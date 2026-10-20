@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import time
 from datetime import datetime, timezone
+import os
 
 end_ms = int(datetime.now(timezone.utc).timestamp()*1000)
 start_ms = end_ms - (3*365*24*60*60*1000)
@@ -26,9 +27,15 @@ while start_ms < end_ms:
 
     time.sleep(0.3)
 
-df = pd.DataFrame([row[:6] for row in all_rows])
+df = pd.DataFrame([row[:7] for row in all_rows])
 price_cols = ["open", "high", "low", "close", "volume"]
-df.columns = ["open_time"] + price_cols
+df.columns = ["open_time"] + price_cols + ["close_time"]
 df[price_cols] = df[price_cols].astype("float64")
+df = df[df["close_time"]< end_ms]
+df.drop(columns="close_time", inplace=True)
 df["open_time"] = pd.to_datetime(df["open_time"], utc=True, unit="ms")
-print(f'Total Candles are {len(df)} and first open_time is {df["open_time"].iloc[0]} and last open_time is {df["open_time"].iloc[-1]}')
+
+os.makedirs("data", exist_ok=True)
+df.to_csv("data/btc_4h.csv", index=False)
+
+print(f'Total Candles are {len(df)} and last open_time is {df["open_time"].iloc[-1]}')
