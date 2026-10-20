@@ -15,4 +15,4 @@ df["prev_time"] = df["open_time"].shift(1)
 anomalies = df[time_diff.notna() & (time_diff != target_duration)]
 print(anomalies[["prev_time","open_time"]])
 
-print(df[((df["high"]<df["open"]) | (df["high"]<df["close"])) | ((df["low"]>df["open"]) | (df["low"]>df["close"])) | df["volume"]<=0])
+print(df[((df["high"]<df["open"]) | (df["high"]<df["close"])) | ((df["low"]>df["open"]) | (df["low"]>df["close"])) | (df["volume"]<=0)])
