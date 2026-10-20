@@ -39,7 +39,7 @@ rs = avg_gain/avg_loss
 df["rsi_14"] = 100-100/(1+rs)
 
 df["target"] = df["return_1"].shift(-1)
-assert df["target"].iloc[500] == df["return_1"].iloc[501]
+assert df["target"].iloc[500] == df["return_1"].iloc[501], "target is not aligned with the next candle's return"
 print(df[["close","return_1","target"]].tail(3))
 
 # checking and droping rows with null values
