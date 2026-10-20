@@ -24,7 +24,7 @@ df["dist_ma_21"] = (df["close"]/df["ma_21"])-1
 print(df.isna().sum())
 df.dropna(inplace=True)
 print(len(df))
-print(df.volume.describe())
+print(df.volume_change.describe())
 
 #8 saving the feature in new csv
 df.to_csv("data/btc_4h_features.csv", index=False)
