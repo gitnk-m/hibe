@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from xgboost import XGBRegressor
 
 df = pd.read_csv("data/btc_4h_features.csv", parse_dates=["open_time"])
 feature_cols = [
@@ -32,13 +33,34 @@ assert df["open_time"].iloc[split_idx] - df["open_time"].iloc[split_idx - 1] == 
 
 
 # Prediction Step
+# baseline_pred = np.zeros(len(y_test))
+# mae = mean_absolute_error(y_test,baseline_pred)
+# mse = mean_squared_error(y_test,baseline_pred)
+# rmse = np.sqrt(mse)
+# mae_dollar = (df["close"].iloc[split_idx:] * (y_test-baseline_pred).abs()).mean()
+# direction_acc = (y_test > 0).mean()
+
+# print(f'mae: {mae:.3%}, rmse: {rmse:.3%}, mae_dollar: {mae_dollar:,.2f}')
+# print(f"Direction (always up): {direction_acc:.2%}")
+
+def evaluate(pred):
+    mae = mean_absolute_error(y_test,pred)
+    mse = mean_squared_error(y_test,pred)
+    rmse = np.sqrt(mse)
+    mae_dollar = (df["close"].iloc[split_idx:] * (y_test-pred).abs()).mean()
+    direction_acc = (np.sign(pred) == np.sign(y_test)).mean()
+    return mae,rmse,mae_dollar,direction_acc 
+
 baseline_pred = np.zeros(len(y_test))
-mae = mean_absolute_error(y_test,baseline_pred)
-mse = mean_squared_error(y_test,baseline_pred)
-rmse = np.sqrt(mse)
-mae_dollar = (df["close"].iloc[split_idx:] * (y_test-baseline_pred).abs()).mean()
-direction_acc = (y_test > 0).mean()
+baseline_scores = evaluate(baseline_pred)
+baseline_direction = (y_test > 0).mean()
 
-print(f'mae: {mae:.3%}, mse: {mse:.3%}, rmse: {rmse:.3%}, mae_doller: {mae_dollar:,.2f}')
-print(f"Direction (always up): {direction_acc:.2%}")
+model = XGBRegressor(n_estimators = 300, max_depth = 3, learning_rate = 0.05, random_state = 42)
+model.fit(X_train, y_train)
+model_pred = model.predict(X_test)
+print(model.feature_importances_, feature_cols)
 
+mae, rmse, mae_dollar, direction_acc = evaluate(model_pred)
+
+# print(f'baseline_scores: ')
+print()
